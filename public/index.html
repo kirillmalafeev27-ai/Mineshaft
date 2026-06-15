@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>ШАХТА</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="menu-screen" class="screen active">
+    <div class="menu-container">
+      <h1 id="game-title">⛏ ШАХТА</h1>
+      <p class="subtitle" id="game-subtitle">Ныряй глубже за сокровищем — или потеряй всё</p>
+
+      <div id="setup-step1" class="setup-step">
+        <div class="menu-options">
+          <div class="option-group name-input-group">
+            <label for="player-name">Имя шахтёра:</label>
+            <input type="text" id="player-name" placeholder="Введите ваше имя..." maxlength="20">
+          </div>
+        </div>
+        <button id="to-step2-btn" class="btn-primary">ДАЛЕЕ</button>
+        <br>
+        <button id="leaderboard-btn" class="btn-secondary">ТАБЛИЦА ЛИДЕРОВ</button>
+      </div>
+
+      <div id="setup-step2" class="setup-step hidden">
+        <h2 class="step-title">Выберите лексическую тему</h2>
+        <p class="step-hint">Все упражнения будут использовать слова из этой темы.</p>
+        <div class="mode-picker" aria-label="Quiz mode">
+          <button type="button" class="mode-btn selected" data-quiz-mode="grammar" aria-pressed="true">Grammatik</button>
+          <button type="button" class="mode-btn" data-quiz-mode="audio" aria-pressed="false">Audio</button>
+        </div>
+        <div id="lexical-grid" class="lexical-grid"></div>
+        <button id="back-to-step1" class="btn-secondary">Назад</button>
+      </div>
+
+      <div id="setup-step3" class="setup-step hidden">
+        <h2 class="step-title">Выберите грамматические темы</h2>
+        <p class="step-hint">Отметьте одну или несколько тем. Уровень задания (A1–B2) ты выбираешь уже в шахте.</p>
+        <div class="audio-mode-only">
+          <h2 class="step-title">Аудиорежим</h2>
+          <p class="step-hint">Выбранная лексическая тема будет использоваться в немецких фразах на слух.</p>
+        </div>
+        <div id="grammar-picker" class="grammar-picker"></div>
+        <div class="step4-buttons">
+          <button id="start-btn" class="btn-primary" disabled>СПУСТИТЬСЯ В ШАХТУ</button>
+          <button id="back-to-step2" class="btn-secondary">Назад</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tutorial-overlay" class="hidden">
+    <div class="tutorial-content">
+      <h2>КАК ИГРАТЬ</h2>
+      <div class="tutorial-step">
+        <span class="step-icon">⛏</span>
+        <strong>Выбери уровень задания</strong> A1–B2. Чем выше уровень — тем труднее вопрос.
+      </div>
+      <div class="tutorial-step">
+        <span class="step-icon">⬇</span>
+        Ответ верный → ныряешь вниз сразу на <strong>столько этажей, какой уровень</strong> (B2 = на 4 вниз).
+      </div>
+      <div class="tutorial-step">
+        <span class="step-icon">🎁</span>
+        Сокровище растёт с глубиной, но его ценность <strong>скрыта</strong> — увидишь только когда заберёшь.
+      </div>
+      <div class="tutorial-step">
+        <span class="step-icon">💥</span>
+        <strong>Ошибся — обвал!</strong> Всё сокровище засыпало. Спуск окончен.
+      </div>
+      <div class="tutorial-step">
+        <span class="step-icon">10</span>
+        Всего <strong>10 вопросов</strong>. Жми «Забрать сокровище» вовремя — жадность губит.
+      </div>
+      <button id="tutorial-close" class="btn-primary">ПОНЯТНО!</button>
+    </div>
+  </div>
+
+  <div id="game-screen" class="screen">
+    <canvas id="game-canvas"></canvas>
+    <div id="death-overlay"></div>
+    <div id="message-banner" class="hidden"></div>
+    <div id="reveal-banner" class="hidden"></div>
+
+    <div id="hud">
+      <div class="hud-item" id="depth-display">Глубина <span id="depth-num">0</span></div>
+      <div class="hud-item" id="questions-display">Вопросы <span id="q-num">0</span>/10</div>
+      <div class="hud-item gold" id="treasure-display">🎁 ???</div>
+      <div class="hud-item best" id="best-display">Рекорд <span id="best-num">0</span></div>
+    </div>
+
+    <div id="loading-overlay" class="hidden">
+      <div class="loading-spinner"></div>
+      <p id="loading-text">Готовим шахту...</p>
+    </div>
+
+    <div id="decision-panel" class="hidden">
+      <p class="decision-prompt" id="decision-prompt"></p>
+      <div class="level-pick">
+        <button class="lvl-btn" data-level="1"><span class="lvl-cefr">A1</span><span class="lvl-drop">↓ 1</span></button>
+        <button class="lvl-btn" data-level="2"><span class="lvl-cefr">A2</span><span class="lvl-drop">↓ 2</span></button>
+        <button class="lvl-btn" data-level="3"><span class="lvl-cefr">B1</span><span class="lvl-drop">↓ 3</span></button>
+        <button class="lvl-btn" data-level="4"><span class="lvl-cefr">B2</span><span class="lvl-drop">↓ 4</span></button>
+      </div>
+      <button id="take-btn" class="btn-bank">🎁 ЗАБРАТЬ СОКРОВИЩЕ</button>
+    </div>
+
+    <div id="question-panel" class="hidden">
+      <div class="question-header">
+        <span id="question-topic-label"></span>
+      </div>
+      <p id="question-text"></p>
+      <div id="question-options"></div>
+      <div id="question-feedback" class="hidden"></div>
+    </div>
+  </div>
+
+  <div id="win-screen" class="screen">
+    <div class="end-container">
+      <h1 id="win-title">🎁 СОКРОВИЩЕ ТВОЁ!</h1>
+      <p id="win-stats"></p>
+      <div class="end-buttons">
+        <button id="win-next" class="btn-primary">НОВЫЙ СПУСК</button>
+        <button id="win-restart" class="btn-secondary">В МЕНЮ</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="lose-screen" class="screen">
+    <div class="end-container">
+      <h1 id="lose-title">💥 ОБВАЛ!</h1>
+      <p id="lose-message">Шахта обрушилась, и сокровище засыпало...</p>
+      <p id="lose-stats"></p>
+      <div class="end-buttons">
+        <button id="lose-restart" class="btn-primary">СПУСТИТЬСЯ СНОВА</button>
+        <button id="lose-menu" class="btn-secondary">В МЕНЮ</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="leaderboard-screen" class="screen">
+    <div class="end-container">
+      <h1 class="leaderboard-title">ТАБЛИЦА ЛИДЕРОВ</h1>
+      <table class="leaderboard-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Имя</th>
+            <th>Глубина</th>
+            <th>Сокровище</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboard-body"></tbody>
+      </table>
+      <p id="leaderboard-empty" class="hidden">Пока нет результатов</p>
+      <button id="leaderboard-back" class="btn-primary">НАЗАД</button>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <script src="js/audio.js"></script>
+  <script src="js/questions.js"></script>
+  <script src="js/renderer.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
