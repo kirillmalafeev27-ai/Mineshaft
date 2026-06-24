@@ -23,6 +23,17 @@ const TOPIC_RULES = {
   Akkusativ: 'Use accusative prepositions and direct objects. Masculine article changes to den/einen.',
   Genitiv: 'Use wegen, trotz, waehrend, innerhalb, ausserhalb, statt; masculine/neuter nouns take -(e)s.',
   Adjektivdeklination: 'Check adjective endings after definite, indefinite, and zero articles. Exactly one option must have the correct ending.',
+  'Komparativ oder Superlativ vor Nomen': `The target is attributive comparative and superlative adjectives directly before nouns, for example "ein größeres Haus" and "das größte Haus".
+The learner must decide from the meaning whether the comparative or superlative is required and must also choose the correct adjective ending for the article, gender, number, and case.
+Use the comparative for a direct comparison with another person, thing, or reference point, often with als. Use the superlative for the highest or lowest degree within an explicit group, with cues such as von allen, in der Klasse, or im ganzen Land.
+Use common irregular forms where suitable, including besser/best-, höher/höchst-, näher/nächst-, and größer/größt-, but keep vocabulary within the requested CEFR level.
+Every tested adjective must be attributive before a noun. Do not test predicative forms such as "größer als" without a following noun, and do not use adverbial "am größten" as the correct answer.
+Create a deliberately mixed exercise set instead of repeating one template. Rotate evenly among these four formats:
+1. Fill one blank inside a German sentence with the correct inflected adjective before a noun.
+2. Read a short comparison context and choose the one complete German sentence that expresses it correctly.
+3. Find and replace an incorrect adjective+noun phrase; the four options are possible replacement phrases.
+4. Read a situation or meaning cue and choose the correct complete noun phrase containing the article, adjective, and noun.
+For a batch of 8 or more tasks, use every format at least twice. Vary the Russian Anweisung to match the format. Keep exactly one Satz or Aufgabe line and exactly four options in every task.`,
   Wechselpraepositionen: 'Use an, auf, hinter, in, neben, ueber, unter, vor, zwischen. Direction takes Akkusativ; location takes Dativ.',
   Negation: 'Use nicht for verbs/adjectives/adverbs/prepositional phrases and kein for nouns with indefinite or zero article.',
   'Wortstellung im Hauptsatz': 'Finite verb must be in position 2. If an adverb or object is in position 1, the subject follows the finite verb.',
@@ -335,9 +346,13 @@ function buildSyntheticPrompt({ level, lexicalTopic, grammarTopic, isWortstellun
   const excludeBlock = exclude && exclude.length
     ? `\nDo not reuse these German sentences: ${exclude.slice(-12).map((item) => `"${item}"`).join(', ')}\n`
     : '';
+  const isAttributiveDegrees =
+    normalizeTopicKey(grammarTopic) === normalizeTopicKey('Komparativ oder Superlativ vor Nomen');
   const taskKind = isWortstellung
     ? 'word-order exercises. The Aufgabe/Satz line contains shuffled words or sentence parts.'
-    : 'gap-fill exercises. The Satz line contains one German sentence with exactly one blank ___.';
+    : isAttributiveDegrees
+      ? 'a varied mix of four multiple-choice formats described in the specific topic rule. Do not make every task a gap-fill.'
+      : 'gap-fill exercises. The Satz line contains one German sentence with exactly one blank ___.';
 
   return `You are an experienced DaF teacher and textbook author.
 
