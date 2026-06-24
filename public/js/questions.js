@@ -26,6 +26,7 @@ const GRAMMAR_TOPICS = [
   'Adjektivdeklination',
   'Komparativ',
   'Superlativ',
+  'Komparativ oder Superlativ vor Nomen',
   'Zahlen und Datum',
   'Temporale Präpositionen',
   'Lokale Präpositionen',
